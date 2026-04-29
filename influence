@@ -13,3 +13,22 @@ for i in top:
     print(i)
 nx.draw(G, node_size=20, with_labels=False)
 plt.show()
+
+
+#Calculate degree, closeness, and eigenvector centrality for nodes in the social graph.Interpret the significance.
+import networkx as nx
+import pandas as pd
+G = nx.erdos_renyi_graph(20, 0.2)
+degree = nx.degree_centrality(G)
+close = nx.closeness_centrality(G)
+eigen = nx.eigenvector_centrality(G)
+data = pd.DataFrame({
+    "Node": list(G.nodes()),
+    "Degree": [degree[i] for i in G.nodes()],
+    "Closeness": [close[i] for i in G.nodes()],
+    "Eigenvector": [eigen[i] for i in G.nodes()]
+})
+print(data)
+top = data.sort_values("Degree", ascending=False).head(1)
+print("\nMost Important Node")
+print(top)
