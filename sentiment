@@ -1,0 +1,148 @@
+#Perform sentiment analysis on Twitter data about airlines. Classify tweets into
+positive, negative, and neutral categories. Evaluate with accuracy, precision, recall,
+and F1-score.
+!pip install kagglehub -q
+import pandas as pd
+import kagglehub
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+path = kagglehub.dataset_download("crowdflower/twitter-airline-sentiment")
+df = pd.read_csv(path + "/Tweets.csv")
+x = df["text"]
+y = df["airline_sentiment"]
+x = TfidfVectorizer(stop_words="english").fit_transform(x)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+model = LogisticRegression()
+model.fit(x_train, y_train)
+y_pred = model.predict(x_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Precision:", precision_score(y_test, y_pred, average="weighted"))
+print("Recall:", recall_score(y_test, y_pred, average="weighted"))
+print("F1 Score:", f1_score(y_test, y_pred, average="weighted"))
+
+
+
+#Apply VADER/TextBlob to analyze sentiments of Amazon product reviews.
+Visualize sentiment distribution.
+!pip install vaderSentiment textblob kagglehub -q
+import pandas as pd
+import matplotlib.pyplot as plt
+from textblob import TextBlob
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import kagglehub
+import os
+path = kagglehub.dataset_download("arhamrumi/amazon-product-reviews")
+print("Path to dataset files:", path)
+print(os.listdir(path))
+df = pd.read_csv(path + "/Reviews.csv")
+df = df[['Text']]
+df = df.dropna()
+df = df.sample(2000, random_state=42)
+analyzer = SentimentIntensityAnalyzer()
+def vader_sentiment(text):
+    score = analyzer.polarity_scores(str(text))['compound']
+    
+    if score >= 0.05:
+        return "Positive"
+    elif score <= -0.05:
+        return "Negative"
+    else:
+        return "Neutral"
+
+df["VADER_Sentiment"] = df["Text"].apply(vader_sentiment)
+
+print("VADER Sentiment Count:")
+print(df["VADER_Sentiment"].value_counts())
+
+df["VADER_Sentiment"].value_counts().plot(kind="bar")
+plt.title("VADER Sentiment Distribution")
+plt.xlabel("Sentiment")
+plt.ylabel("Number of Reviews")
+plt.show()
+def textblob_sentiment(text):
+    score = TextBlob(str(text)).sentiment.polarity
+    
+    if score > 0:
+        return "Positive"
+    elif score < 0:
+        return "Negative"
+    else:
+        return "Neutral"
+df["TextBlob_Sentiment"] = df["Text"].apply(textblob_sentiment)
+print("\nTextBlob Sentiment Count:")
+print(df["TextBlob_Sentiment"].value_counts())
+df["TextBlob_Sentiment"].value_counts().plot(kind="bar")
+plt.title("TextBlob Sentiment Distribution")
+plt.xlabel("Sentiment")
+plt.ylabel("Number of Reviews")
+plt.show()
+
+
+#Perform comparative sentiment analysis for google vs apple using pre-downloaded
+tweet data.
+import kagglehub
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+path = kagglehub.dataset_download("tusharpaul2001/brand-sentiment-analysis-dataset")
+print("Path:", path)
+
+file = [f for f in os.listdir(path) if f.endswith(".csv")][0]
+df = pd.read_csv(os.path.join(path, file))
+
+print(df.columns)
+
+df = df[['tweet_text', 'emotion_in_tweet_is_directed_at',
+         'is_there_an_emotion_directed_at_a_brand_or_product']]
+
+df.columns = ['Tweet', 'Brand', 'Sentiment']
+df = df.dropna()
+
+google = df[df['Brand'].str.contains("Google", case=False, na=False)]
+apple = df[df['Brand'].str.contains("Apple", case=False, na=False)]
+
+data = pd.concat([google, apple])
+
+X = data['Tweet']
+y = data['Sentiment']
+
+tfidf = TfidfVectorizer(stop_words='english')
+X = tfidf.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+pred = model.predict(X_test)
+
+print("Accuracy :", accuracy_score(y_test, pred))
+print("Precision:", precision_score(y_test, pred, average='weighted'))
+print("Recall   :", recall_score(y_test, pred, average='weighted'))
+print("F1 Score :", f1_score(y_test, pred, average='weighted'))
+
+g = google['Sentiment'].value_counts()
+a = apple['Sentiment'].value_counts()
+
+compare = pd.DataFrame({
+    "Google": g,
+    "Apple": a
+}).fillna(0)
+
+print(compare)
+
+compare.plot(kind="bar")
+plt.title("Google vs Apple Sentiment Comparison")
+plt.xlabel("Sentiment")
+plt.ylabel("Tweets")
+plt.show()
+
+
+
