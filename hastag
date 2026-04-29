@@ -1,0 +1,65 @@
+#Perform hashtag frequency analysis from a COVID-19 tweet dataset.
+import kagglehub
+import pandas as pd
+import os
+import re
+import matplotlib.pyplot as plt
+from collections import Counter
+path = kagglehub.dataset_download("gpreda/covid19-tweets")
+print(path)
+file = os.listdir(path)[0]
+df = pd.read_csv(os.path.join(path, file))
+tags = []
+for i in df["text"].dropna():
+    x = re.findall(r"#(\w+)", i)
+    tags.extend(x)
+top = Counter(tags).most_common(10)
+data = pd.DataFrame(top, columns=["Hashtag", "Count"])
+print(data)
+plt.bar(data["Hashtag"], data["Count"])
+plt.xticks(rotation=90)
+plt.show()
+
+
+
+#Build a word cloud and perform n-gram analysis on Yelp restaurant reviews.
+Identify common complaint areas.
+import kagglehub
+import pandas as pd
+import os
+import re
+import matplotlib.pyplot as plt
+from collections import Counter
+from wordcloud import WordCloud
+
+path = kagglehub.dataset_download("yelp-dataset/yelp-dataset")
+print(path)
+
+file = os.path.join(path, "yelp_academic_dataset_review.json")
+
+df = pd.read_json(file, lines=True, nrows=2000)
+
+text = " ".join(df["text"].dropna())
+
+text = text.lower()
+text = re.sub(r"[^a-z\s]", "", text)
+
+wc = WordCloud(background_color="white").generate(text)
+plt.imshow(wc)
+plt.axis("off")
+plt.show()
+
+words = text.split()
+pairs = []
+
+for i in range(len(words)-1):
+    pairs.append(words[i] + " " + words[i+1])
+
+top = Counter(pairs).most_common(10)
+
+data = pd.DataFrame(top, columns=["Bigram", "Count"])
+print(data)
+
+plt.bar(data["Bigram"], data["Count"])
+plt.xticks(rotation=90)
+plt.show()
