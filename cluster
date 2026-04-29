@@ -1,0 +1,45 @@
+#Analyze social network structure using Facebook page-page network. Identify
+clusters and calculate modularity.
+import pandas as pd
+import networkx as nx
+from networkx.algorithms.community import greedy_modularity_communities
+
+df = pd.read_csv("facebook_combined.txt", sep=' ', header=None)
+df.columns = ['source','target']
+
+G = nx.from_pandas_edgelist(df, 'source', 'target')
+
+comm = greedy_modularity_communities(G)
+mod = nx.algorithms.community.modularity(G, comm)
+
+print("Number of Clusters:", len(comm))
+print("Modularity:", mod)
+
+
+#Perform user behavior segmentation on mobile web data using clustering
+(K-means).
+import kagglehub
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+path = kagglehub.dataset_download("valakhorasani/mobile-device-usage-and-user-behavior-dataset")
+print(path)
+file = [f for f in os.listdir(path) if f.endswith(".csv")][0]
+df = pd.read_csv(os.path.join(path, file))
+df = df.dropna()
+X = df[['App Usage Time (min/day)',
+        'Screen On Time (hours/day)',
+        'Battery Drain (mAh/day)',
+        'Data Usage (MB/day)']]
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+kmeans = KMeans(n_clusters=3, random_state=42)
+df['Cluster'] = kmeans.fit_predict(X)
+print(df[['User ID', 'Cluster']].head())
+plt.scatter(df['App Usage Time (min/day)'], df['Data Usage (MB/day)'], c=df['Cluster'])
+plt.xlabel("App Usage Time")
+plt.ylabel("Data Usage")
+plt.title("User Behavior Segmentation")
+plt.show()
