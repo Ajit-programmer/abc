@@ -72,3 +72,49 @@ plt.title("User Navigation Paths")
 plt.xlabel("User Session")
 plt.ylabel("Page Activity")
 plt.show()
+
+
+#17. Compare 2 hospital websites using Google Trends and SimilarWeb and analyze results
+import pandas as pd
+import matplotlib.pyplot as plt
+data = {
+    "Website": ["Mayo Clinic", "Cleveland Clinic"],
+    "Bounce Rate": [78.31, 65.58],
+    "Visit Duration": [67, 85],
+    "Pages per Visit": [1.56, 1.84]
+}
+df = pd.DataFrame(data)
+print(df)
+plt.bar(df["Website"], df["Bounce Rate"])
+plt.title("Bounce Rate Comparison")
+plt.ylabel("Bounce Rate")
+plt.show()
+plt.bar(df["Website"], df["Visit Duration"])
+plt.title("Visit Duration Comparison")
+plt.ylabel("Seconds")
+plt.show()
+plt.bar(df["Website"], df["Pages per Visit"])
+plt.title("Pages per Visit Comparison")
+plt.ylabel("Pages")
+plt.show()
+
+
+#To acquire social media data through various methods as mentioned below and analyse the results. 1. Beautiful Soup 2. Request 3. API 4. Scrapy Tool
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+url = "https://quotes.toscrape.com"
+r = requests.get(url)
+soup = BeautifulSoup(r.text, "html.parser")
+quotes = []
+authors = []
+for q in soup.find_all("span", class_="text"):
+    quotes.append(q.text)
+for a in soup.find_all("small", class_="author"):
+    authors.append(a.text)
+df = pd.DataFrame({
+    "Quote": quotes,
+    "Author": authors
+})
+print(df.head())
+print("Total Quotes:", len(df))
