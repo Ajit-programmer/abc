@@ -1,56 +1,70 @@
 #Build a spam classifier using TF-IDF and Naive Bayes on SMS data.
+import kagglehub
 import pandas as pd
-from sklearn.model_selection import train_test_split
+import os
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score
-df = pd.read_csv("spam.csv", encoding="latin-1")
-df = df[['v1', 'v2']]
-df.columns = ['label', 'message']
-df['label'] = df['label'].map({'ham':0, 'spam':1})
-x = df['message']
-y = df['label']
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
-tfidf = TfidfVectorizer(stop_words='english')
-x_train = tfidf.fit_transform(x_train)
-x_test = tfidf.transform(x_test)
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+path = kagglehub.dataset_download("uciml/sms-spam-collection-dataset")
+print(path)
+file = [f for f in os.listdir(path) if f.endswith(".csv") or f.endswith(".tsv")][0]
+df = pd.read_csv(os.path.join(path, file), encoding="latin-1")
+df = df.iloc[:, :2]
+df.columns = ["label", "message"]
+df = df.dropna()
+X = df["message"].astype(str)
+y = df["label"]
+tfidf = TfidfVectorizer()
+X = tfidf.fit_transform(X)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 model = MultinomialNB()
-model.fit(x_train, y_train)
-y_pred = model.predict(x_test)
-print("Accuracy is:", accuracy_score(y_test, y_pred))
+model.fit(X_train, y_train)
+pred = model.predict(X_test)
+print("Accuracy :", accuracy_score(y_test, pred))
+print("Precision:", precision_score(y_test, pred, pos_label="spam"))
+print("Recall   :", recall_score(y_test, pred, pos_label="spam"))
+print("F1 Score :", f1_score(y_test, pred, pos_label="spam"))
 
 
-#Use TF-IDF and cosine similarity to find similar product descriptions in an
-e-commerce dataset.
+#Use TF-IDF and cosine similarity to find similar product descriptions in an e-commerce dataset.
+import kagglehub
 import pandas as pd
+import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-df = pd.read_json("flipkart_fashion_products_dataset.json")
-df = df[['title','description']]
+path = kagglehub.dataset_download("aaditshukla/flipkart-fasion-products-dataset")
+print(path)
+df = pd.read_json(os.path.join(path, "flipkart_fashion_products_dataset.json"))
 df = df.dropna()
-tfidf = TfidfVectorizer()
-x = tfidf.fit_transform(df['description'])
-sim = cosine_similarity(x)
-for i in range(1,4):
-    print(df.iloc[i]['title'], sim[0][i])
+print(df.columns)
+text = df.iloc[:, 1].astype(str)
+tfidf = TfidfVectorizer(stop_words="english")
+X = tfidf.fit_transform(text)
+sim = cosine_similarity(X[:5], X[:5])
+print(pd.DataFrame(sim))
+
+
 
 #Analyze LinkedIn job postings using TF-IDF to identify in-demand skills.
+import kagglehub
 import pandas as pd
+import os
 from sklearn.feature_extraction.text import TfidfVectorizer
-
-df = pd.read_csv("job_postings.csv")
-
-df = df[['description']]
+path = kagglehub.dataset_download("rajatraj0502/linkedin-job-2023")
+print(path)
+file = [f for f in os.listdir(path) if f.endswith(".csv")][0]
+df = pd.read_csv(os.path.join(path, file))
 df = df.dropna()
-
-tfidf = TfidfVectorizer(stop_words='english', max_features=20)
-x = tfidf.fit_transform(df['description'])
-
+print(df.columns)
+text = df.iloc[:, 1].astype(str)
+tfidf = TfidfVectorizer(stop_words="english", max_features=20)
+X = tfidf.fit_transform(text)
 words = tfidf.get_feature_names_out()
-score = x.sum(axis=0).A1
-
-skill = pd.DataFrame({'Skill': words, 'Score': score})
-skill = skill.sort_values(by='Score', ascending=False)
-
-print(skill)
+scores = X.sum(axis=0).A1
+result = pd.DataFrame({
+    "Skill": words,
+    "Score": scores
+}).sort_values("Score", ascending=False)
+print(result)
 
