@@ -1,0 +1,62 @@
+#Create a synthetic social network using NetworkX. Apply various visualizations using matplotlib.
+import networkx as nx
+import matplotlib.pyplot as plt
+G = nx.erdos_renyi_graph(20, 0.2)
+plt.figure(figsize=(8,6))
+nx.draw(G, with_labels=True)
+plt.title("Social Network Graph")
+plt.show()
+plt.figure(figsize=(8,6))
+nx.draw_circular(G, with_labels=True)
+plt.title("Circular Layout")
+plt.show()
+plt.figure(figsize=(8,6))
+nx.draw_shell(G, with_labels=True)
+plt.title("Shell Layout")
+plt.show()
+
+
+#25. To implement Social Network data analysis using NetworkX
+i) create random social network graph
+ii) find influencer node
+iii) calculate different network measures such as degree centrality etc.
+
+import networkx as nx
+import matplotlib.pyplot as plt
+G = nx.erdos_renyi_graph(20, 0.2)
+plt.figure(figsize=(8,6))
+nx.draw(G, with_labels=True)
+plt.title("Random Social Network")
+plt.show()
+degree = nx.degree_centrality(G)
+close = nx.closeness_centrality(G)
+between = nx.betweenness_centrality(G)
+influencer = max(degree, key=degree.get)
+print("Influencer Node:", influencer)
+print("Degree Centrality")
+print(degree)
+print("Closeness Centrality")
+print(close)
+print("Betweenness Centrality")
+print(between)
+
+
+#26. To analyze the structure of social media data using graph theory, identify influential users
+(e.g., central users, popular posts), and explore network interactions
+import networkx as nx
+import matplotlib.pyplot as plt
+G = nx.erdos_renyi_graph(25, 0.2)
+plt.figure(figsize=(8,6))
+nx.draw(G, with_labels=True)
+plt.title("Social Media Network")
+plt.show()
+degree = nx.degree_centrality(G)
+between = nx.betweenness_centrality(G)
+close = nx.closeness_centrality(G)
+top_user = max(degree, key=degree.get)
+print("Most Influential User:", top_user)
+print("Degree Centrality:", degree[top_user])
+print("Betweenness Centrality:", between[top_user])
+print("Closeness Centrality:", close[top_user])
+print("Average Clustering:", nx.average_clustering(G))
+print("Network Density:", nx.density(G))
