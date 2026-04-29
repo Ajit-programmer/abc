@@ -1,0 +1,56 @@
+#Build a spam classifier using TF-IDF and Naive Bayes on SMS data.
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score
+df = pd.read_csv("spam.csv", encoding="latin-1")
+df = df[['v1', 'v2']]
+df.columns = ['label', 'message']
+df['label'] = df['label'].map({'ham':0, 'spam':1})
+x = df['message']
+y = df['label']
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+tfidf = TfidfVectorizer(stop_words='english')
+x_train = tfidf.fit_transform(x_train)
+x_test = tfidf.transform(x_test)
+model = MultinomialNB()
+model.fit(x_train, y_train)
+y_pred = model.predict(x_test)
+print("Accuracy is:", accuracy_score(y_test, y_pred))
+
+
+#Use TF-IDF and cosine similarity to find similar product descriptions in an
+e-commerce dataset.
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+df = pd.read_json("flipkart_fashion_products_dataset.json")
+df = df[['title','description']]
+df = df.dropna()
+tfidf = TfidfVectorizer()
+x = tfidf.fit_transform(df['description'])
+sim = cosine_similarity(x)
+for i in range(1,4):
+    print(df.iloc[i]['title'], sim[0][i])
+
+#Analyze LinkedIn job postings using TF-IDF to identify in-demand skills.
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+df = pd.read_csv("job_postings.csv")
+
+df = df[['description']]
+df = df.dropna()
+
+tfidf = TfidfVectorizer(stop_words='english', max_features=20)
+x = tfidf.fit_transform(df['description'])
+
+words = tfidf.get_feature_names_out()
+score = x.sum(axis=0).A1
+
+skill = pd.DataFrame({'Skill': words, 'Score': score})
+skill = skill.sort_values(by='Score', ascending=False)
+
+print(skill)
+
